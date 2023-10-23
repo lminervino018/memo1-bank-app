@@ -2,6 +2,7 @@ package com.aninfo.service;
 
 import com.aninfo.exceptions.DepositNegativeSumException;
 import com.aninfo.exceptions.InsufficientFundsException;
+import com.aninfo.exceptions.InvalidTransactionTypeException;
 import com.aninfo.model.Account;
 import com.aninfo.model.Deposit;
 import com.aninfo.model.Transaction;
@@ -49,7 +50,13 @@ public class TransactionService {
         Transaction transaction = transactionRepository.findTransactionById(id);
         Account account = accountRepository.findAccountByCbu(transaction.getCbu());
 
-        account.setBalance(account.getBalance() + transaction.getAmountAfterDeletion());
+        Double new_balance = account.getBalance() + transaction.getAmountAfterDeletion();
+
+        if (new_balance < 0) {
+            throw new InvalidTransactionTypeException("Cannot delete transaction");
+        }
+
+        account.setBalance(new_balance);
 
         transactionRepository.deleteById(id);
     }
